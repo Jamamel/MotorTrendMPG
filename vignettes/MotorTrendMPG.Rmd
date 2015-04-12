@@ -1,0 +1,83 @@
+---
+title: "Analyzing the effect of transmition type on MPG efficiency"
+author: "Jamamel"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MotorTrendMPG}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Objective
+
+This report aims to understand the effect of transmition type (automatic vs. manual) in combination with other variables on MPG efficiency of cars. The analysis is carried out using the *mtcars* dataset in R, and combines a series of exploratory and regression based analyses to answer quantify just how much MPG varies across different car setups.
+
+This analysis aims to explore the *mtcars* from the *datasets* package included in R to determine the impact of several variables to describe miles per gallon (*MPG*) efficiency. Specifically, two questions will be answered:
+
+1. Is an automatic or manual transmission better for *MPG*?
+2. How to quantify the *MPG* difference between automatic and manual transmissions?
+
+A series of exploratory analysis was carried out to identify potential candidates for data relationships that could help produce answers. Specifically, the impact of transmission type (automatic vs. manual) on mpg. 
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+library(ggplot2)
+library(GGally)
+data(mtcars)
+
+mtcars$am <- factor(mtcars$am, levels = c(0,1), labels = c('automatic', 'manual'))
+mtcars$vs <- factor(mtcars$vs, levels = c(0,1), labels = c('v', 'straight'))
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+mtcars$cyl <- factor(mtcars$cyl)
+
+contcorr <- ggpairs(mtcars,
+        colour = 'am',
+        columns = c(1,3:7,9))
+
+disccorr <- ggpairs(mtcars,
+        colour = 'am',
+        columns = c(1:2,8:11))
+```
+
+The *mtcars* datset consists of `r nrow(mtcars)` different car models, where different measures were recorded:
+
+Variable | Definition
+- | -
+mpg | Miles per gallon
+cyl | Number of cylinders
+disp | Displacement (cubic inches)
+hp | Gross horsepower
+drat | Rear axle ration
+wt | Weight (lb/1000)
+qsec | Quarter mile time
+vs | V vs. Straight engine
+am | Transmission (automatic vs. manual)
+gear | Number of forward gears
+carb | Number of carburetors
+
+# Exploratory Analysis
+
+Initial exploratory analysis shows *mpg* has a high correlation with a few variables relating to the car's dimensions. Moreover, and as expected, a car's weight (*wt*), displacement (*disp*), and gross horse power (*hp*) are themselves highly correlated, suggesting any linear-based regression modelling approach will confound any effects like these should they all be included in the model directly (see *Figure 1*). In addition, there appear to be clear relationships again between transmision type and car attributes like cylinders (*cyl*), engine type (*vs*), and number of carburetors (*carb*). However, the distribution of the number of forward gears (*gear*) and tends to be fuzzier, perhaps due to the small number of observations in our dataset (see *Figure 2*).
+
+While some patterns are visible between the type of transmission and some other attributes, it is sometimes difficult to determine whether these patterns are logical and expected, vs. purely random observations in this particular data. So, while manual transmission cars tend to have more forward gears, cylinders, and carburetors, there's no immediate evidence of these being linked more directly to engine type.
+
+# Modelling MPG
+
+After the brief exploratory analysis, a few of these relationships were modelled using linear regression to try and quantify the effect on *MPG* different car specs may have, focusing on transmission type. The exploratory phase revealed linear regression was a suitable technique given *mpg* appears to follow a distribution that appears Normally distributed.
+
+
+
+
+
+\newpage
+
+# Appendix
+
+```{r contcorr, anchor=TRUE, echo=FALSE, warning=FALSE, results='markup', message=FALSE, fig.cap='Correlation of car dimensions to mpg split by transmision type.'}
+print(contcorr)
+```
+
+```{r disccorr, anchor=TRUE, echo=FALSE, warning=FALSE, results='markup', message=FALSE, fig.cap='Distribution of car attributes to and mpg split by transmision type.'}
+print(disccorr)
+```
