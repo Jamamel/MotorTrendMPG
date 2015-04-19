@@ -71,8 +71,8 @@ Hash: 89dc4c8734dad5322bb3c5c2af09056f
 
 Package: evaluate
 Source: CRAN
-Version: 0.5.5
-Hash: 20881970e590ee68de97a468694db7b0
+Version: 0.6
+Hash: 1dff379afa4a41ca703a24d50aa69f64
 Requires: stringr
 
 Package: formatR
@@ -110,8 +110,8 @@ Requires: R6, RCurl, digest, jsonlite, mime, stringr
 
 Package: jsonlite
 Source: CRAN
-Version: 0.9.15
-Hash: b37521d52b478d17ebf75e58d7a71354
+Version: 0.9.16
+Hash: d96313db22c1ea2028538db1fc96fe5a
 
 Package: knitr
 Source: CRAN
@@ -183,8 +183,8 @@ Requires: caTools, htmltools, knitr, yaml
 
 Package: roxygen2
 Source: CRAN
-Version: 4.1.0
-Hash: 271ed55984feccbfac9a4c3a95e79fdf
+Version: 4.1.1
+Hash: e030acbd1526c09f7b74315c40f87480
 Requires: Rcpp, brew, digest, stringr
 
 Package: rstudioapi
