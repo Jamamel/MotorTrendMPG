@@ -1,8 +1,12 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
 ---
 author: Jamamel
 title: "Analyzing the effect of transmition type on MPG efficiency"
 abstract: >
-  This report aims to understand the effect of transmition type (automatic vs. manual) in combination with other variables on MPG efficiency of cars. The analysis is carried out using the *mtcars* dataset in R, and combines a series of exploratory and regression based analyses to answer quantify just how much MPG varies across different car setups.
+  The following analysis identifies alternative scenarios in MPG efficiency in cars due to the presence of different types of transmition (automatic vs. manual). These are described through statistical inference and provide a quantifiable measure of benefit from one type compared to the other. All analyses use R dataset *mtcars*, and combine a series of exploratory and regression based techniques to quantify efficiency based on observed data.
 output: 
   pdf_document: 
     fig_caption: yes
@@ -10,14 +14,14 @@ output:
 
 # Objective
 
-This analysis aims to explore the *mtcars* from the *datasets* package included in R to determine the impact of several variables to describe miles per gallon (*MPG*) efficiency. Specifically, two questions will be answered:
+We use dataset *mtcars* from the *datasets* R package, and our aim is to determine the impact of several variables in the efficiency and accuracy of quantifying fuel consumption efficiency through mile-per-galon (*MPG*). Specifically, two questions will be answered:
 
 1. Is an automatic or manual transmission better for *MPG*?
-2. How to quantify the *MPG* difference between automatic and manual transmissions?
+2. How much better (measured by change in *MPG*) is one type of transmition vs. the other? 
 
-A series of exploratory analysis was carried out to identify potential candidates for data relationships that could help produce answers. Specifically, the impact of transmission type (automatic vs. manual) on mpg. 
+We start by identifying possible correlation among variables included in our data. A series of exploratory analyses helped identify data relationship candidates. Specifically, any relationships to transmission type (automatic vs. manual; variable *am*) & mpg (variable *mpg*). 
 
-```{r, echo=FALSE, warning=FALSE, results='hide'}
+```{r exploratory, echo=FALSE, warning=FALSE, results='hide', cache=TRUE}
 library(ggplot2)
 library(GGally)
 data(mtcars)
@@ -37,9 +41,9 @@ disccorr <- ggpairs(mtcars,
         columns = c(1:2,8:11))
 ```
 
-The *mtcars* datset consists of `r nrow(mtcars)` different car models, where different measures were recorded:
+*mtcars* contains data for `r nrow(mtcars)` unique car models, with the following measures:
 
-Variable | Definition
+Measure (Variable) | Definition
 - | -
 mpg | Miles per gallon
 cyl | Number of cylinders
@@ -55,16 +59,50 @@ carb | Number of carburetors
 
 # Exploratory Analysis
 
-Initial exploratory analysis shows *mpg* has a high correlation with a few variables relating to the car's dimensions. Moreover, and as expected, a car's weight (*wt*), displacement (*disp*), and gross horse power (*hp*) are themselves highly correlated, suggesting any linear-based regression modelling approach will confound any effects like these should they all be included in the model directly (see *Figure 1*). In addition, there appear to be clear relationships again between transmision type and car attributes like cylinders (*cyl*), engine type (*vs*), and number of carburetors (*carb*). However, the distribution of the number of forward gears (*gear*) and tends to be fuzzier, perhaps due to the small number of observations in our dataset (see *Figure 2*).
+A combination of correlation, and plotting is performed for initial exploration.
 
-While some patterns are visible between the type of transmission and some other attributes, it is sometimes difficult to determine whether these patterns are logical and expected, vs. purely random observations in this particular data. So, while manual transmission cars tend to have more forward gears, cylinders, and carburetors, there's no immediate evidence of these being linked more directly to engine type.
+*mpg* has high correlation with a few variables relating to the car dimensions. Also, a car's weight (*wt*), displacement (*disp*), and gross horse power (*hp*) are themselves highly correlated. This suggests any linear-based regression modelling approach will confound any effects. This is especially true should they all be included in a model directly (see *Figure 1*). There also appear to be clear relationships between transmision type (*am*) and attributes like number of cylinders (*cyl*) or carburetors (*carb*), or engine type (*vs*). However, the distribution of the number of forward gears (*gear*) is less clear, perhaps due to the small number of observations in our dataset (see *Figure 2*).
+
+While some patterns are visible between transmission and some other attributes, it is sometimes difficult to determine whether these patterns are logical and expected, rather than purely random observations in this particular data. So, while manual transmission cars tend to have more forward gears, cylinders, and carburetors, there's no immediate evidence of these being linked more directly to engine type.
 
 # Modelling MPG
 
-After the brief exploratory analysis, a few of these relationships were modelled using linear regression to try and quantify the effect on *MPG* different car specs may have, focusing on transmission type. The exploratory phase revealed linear regression was a suitable technique given *mpg* appears to follow a distribution that appears Normally distributed.
+Next, a few of the relationships identified were modelled through linear regression to try and quantify the effect of different car specs on *MPG*, namely transmission type. The exploratory phase confirmed linear regression was a suitable approach given *mpg* empirically close to a Normal distribution.
+
+After a series of iterations (described in comments in [R Markdown file](https://github.com/Jamamel/MotorTrendMPG/blob/master/R/MotorTrendMPG.R))
+
+```{r models, echo=FALSE, results='hide', fig.keep='none', warning=FALSE}
+# First model reveals a possible relationship of wt and hp when all other effects present. 
+# Good fit but mostly driven by large number of parameters. 
+fit0 <- lm(mpg ~ ., mtcars)
+summary(fit0)
+
+# Large residuals and the assumption of Normality in the regressions error terms appears not to be accurate.
+par(mfrow = c(2,2))
+plot(fit0)
+
+# By defining a model where MPG is explained by factor effect of transmition type and weight along with their interaction. Number of cylinders is also introduced as factor.
+fit <- lm(mpg ~ am * wt + cyl, mtcars)
+summary(fit)
+
+# Adjustment is not much worse than when all variables (and its high number of parameters) were used. In addition, all coefficients have low enough standard errors to be acceptable for the author (especially given the low sample size given the complex relationships present and the limitation of tools allowed in this exercise). 
 
 
 
+# Lower fit, greater residual variance, less nice QQ plot. General lower accuracy observed.
+fit2 <- lm(mpg ~ am + cyl, mtcars)
+summary(fit2)
+par(mfrow = c(2,2))
+plot(fit2)
+
+
+# Still a mediocre model with slightly lower residual variance than fit2. The rogue group of cars is larger, meaning we don't describe enough patterns with as much consistency.
+fit3 <- lm(mpg ~ am + cyl + wt, mtcars)
+summary(fit3)
+par(mfrow = c(2,2))
+plot(fit3)
+
+```
 
 
 \newpage
@@ -77,4 +115,15 @@ print(contcorr)
 
 ```{r disccorr, anchor=TRUE, echo=FALSE, warning=FALSE, results='markup', message=FALSE, fig.cap='Distribution of car attributes to and mpg split by transmision type.'}
 print(disccorr)
+```
+
+```{r plotmodels, anchor=TRUE, echo=FALSE, warning=FALSE, results='markup', message=FALSE, fig.cap='Model Fit Diagnostics'}
+# fit0 - Large residuals and the assumption of Normality in the regressions error terms appears not to be accurate.
+par(mfrow = c(2,2))
+plot(fit0)
+
+
+# fit - Residual variance is lower and the assumption of Normality, while not perfect, is better founded. Four cars have a similar patterns that aren't easily isolated with simple linear regression.  However, fit and parsimony of the model were deemed acceptable.
+par(mfrow = c(2,2))
+plot(fit)
 ```
