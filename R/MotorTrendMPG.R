@@ -16,10 +16,6 @@ mtcars$cmpg <- scale(mtcars$mpg, scale = FALSE)
 mtcars$toy <- ifelse(rownames(mtcars) == 'Toyota Corolla',1,0)
 mtcars$fiat <- ifelse(rownames(mtcars) == 'Fiat 128',1,0)
 
-mtcars %>%
-  group_by(am, cyl, toy, fiat) %>%
-  summarise(mpg = mean(mpg),
-            wt = mean(cwt))
 
 ggpairs(mtcars,
         colour = 'am',
@@ -69,4 +65,10 @@ plot(fit3)
 
 
 
-anova(fit,fit0)
+mtcars %>%
+  group_by(am) %>%
+  summarise(mpg = round(mean(mpg), 0),
+            weight = round(mean(wt), 1),
+            cylinders = names(table(cyl))[match(max(table(cyl)), table(cyl))])
+
+
