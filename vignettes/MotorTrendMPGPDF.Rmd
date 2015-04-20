@@ -3,13 +3,14 @@ knitr::opts_chunk$set(cache=TRUE)
 ```
 
 ---
-author: Jamamel
 title: "Analyzing the effect of transmition type on MPG efficiency"
-abstract: >
-  The following analysis identifies alternative scenarios in MPG efficiency in cars due to the presence of different types of transmition (automatic vs. manual). These are described through statistical inference and provide a quantifiable measure of benefit from one type compared to the other. All analyses use R dataset *mtcars*, and combine a series of exploratory and regression based techniques to quantify efficiency based on observed data.
-output: 
-  pdf_document: 
+author: "Jamamel"
+output:
+  pdf_document:
     fig_caption: yes
+    keep_tex: yes
+abstract: |
+  The following analysis identifies alternative scenarios in MPG efficiency in cars due to the presence of different types of transmition (automatic vs. manual). These are described through statistical inference and provide a quantifiable measure of benefit from one type compared to the other. All analyses use R dataset *mtcars*, and combine a series of exploratory and regression based techniques to quantify efficiency based on observed data.
 ---
 
 # Objective
@@ -21,9 +22,10 @@ We use dataset *mtcars* from the *datasets* R package, and our aim is to determi
 
 We start by identifying possible correlation among variables included in our data. A series of exploratory analyses helped identify data relationship candidates. Specifically, any relationships to transmission type (automatic vs. manual; variable *am*) & mpg (variable *mpg*). 
 
-```{r exploratory, echo=FALSE, warning=FALSE, results='hide', cache=TRUE}
+```{r exploratory, echo=FALSE, warning=FALSE, results='hide', cache=TRUE, message=FALSE}
 library(ggplot2)
 library(GGally)
+library(dplyr)
 data(mtcars)
 
 mtcars$am <- factor(mtcars$am, levels = c(0,1), labels = c('automatic', 'manual'))
@@ -31,6 +33,11 @@ mtcars$vs <- factor(mtcars$vs, levels = c(0,1), labels = c('v', 'straight'))
 mtcars$gear <- factor(mtcars$gear)
 mtcars$carb <- factor(mtcars$carb)
 mtcars$cyl <- factor(mtcars$cyl)
+mtcars$cwt <- scale(mtcars$wt, scale = FALSE)
+mtcars$cdisp <- scale(mtcars$disp, scale = FALSE)
+mtcars$toy <- ifelse(rownames(mtcars) == 'Toyota Corolla',1,0)
+mtcars$fiat <- ifelse(rownames(mtcars) == 'Fiat 128',1,0)
+
 
 contcorr <- ggpairs(mtcars,
         colour = 'am',
@@ -69,7 +76,7 @@ While some patterns are visible between transmission and some other attributes, 
 
 Next, a few of the relationships identified were modelled through linear regression to try and quantify the effect of different car specs on *MPG*, namely transmission type. The exploratory phase confirmed linear regression was a suitable approach given *mpg* empirically close to a Normal distribution.
 
-After a series of iterations (described in comments in [R Markdown file](https://github.com/Jamamel/MotorTrendMPG/blob/master/R/MotorTrendMPG.R))
+After a series of iterations (described in comments of [R Markdown file](https://github.com/Jamamel/MotorTrendMPG/blob/master/R/MotorTrendMPG.R)), the best model was that in which *mpg* was described by the interaction between type of transmision and weight, number of cylinders (as a factor referencing 4 cylinders, the type of transmision on its own, and two dummy variables for Toyota Corolla and Fiat 128 cars. These 2 cars were modelled uniquely given their leverage on the model (see results below). 
 
 ```{r models, echo=FALSE, results='hide', fig.keep='none', warning=FALSE}
 # First model reveals a possible relationship of wt and hp when all other effects present. 
@@ -82,7 +89,8 @@ par(mfrow = c(2,2))
 plot(fit0)
 
 # By defining a model where MPG is explained by factor effect of transmition type and weight along with their interaction. Number of cylinders is also introduced as factor.
-fit <- lm(mpg ~ am * wt + cyl, mtcars)
+mtcars$cyl <- as.numeric(mtcars$cyl)
+fit <- lm(mpg ~ am * cwt + cyl + toy + fiat, mtcars)
 summary(fit)
 
 # Adjustment is not much worse than when all variables (and its high number of parameters) were used. In addition, all coefficients have low enough standard errors to be acceptable for the author (especially given the low sample size given the complex relationships present and the limitation of tools allowed in this exercise). 
@@ -104,6 +112,17 @@ plot(fit3)
 
 ```
 
+```{r fitmodel, echo=FALSE}
+knitr::kable(round(summary(fit)$coefficients, 3))
+```
+
+All estimated coefficients have acceptable p-values, and adjusted overall fit stands at a high **`r round(summary(fit)$adj.r.squared, 2)` with `r summary(fit)$df[2]` degrees of freedom** . Of more interest is the fact the residual standard error is low at **`r round(summary(fit)$sigma,2)`**. Residual analysis also shows all residuals are within 1.5 standard deviations of the mean. Normality is fairly consistent apart from a couple of cases which don't have enough leverage on the analysis to make a meaningful difference (*See Figure 3*).
+
+# Results & Conclusions
+ 
+At average car weight, manual transmision on its own appears to have a slight negative effect on MPG (`r round(summary(fit)$coefficients['ammanual',1], 2)` vs. the equivalent automatic transmision). This effect, however, is mostly compensated by other usual attributes automatic transmision cars which greatly hinder MPG. For every ton above the average, MPG decreases by `r round(summary(fit)$coefficients['cwt',1], 2)`, and for every extra cylinder, MPG decreases by a further `r round(summary(fit)$coefficients['cyl',1], 2)`. When one considers the average difference in weight and usually higher number of cylinders of automatic transmision cars, the counter effect becomes clear. 
+
+The model does suggest that an increase of one ton for manual transmision vehicles has a much more profound effect on the efficiency of the car (decrease of `r round(summary(fit)$coefficients['ammanual:cwt',1], 2)` MPG).
 
 \newpage
 

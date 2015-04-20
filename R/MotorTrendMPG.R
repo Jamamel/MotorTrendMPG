@@ -10,8 +10,16 @@ mtcars$vs <- factor(mtcars$vs, levels = c(0,1), labels = c('v', 'straight'))
 mtcars$gear <- factor(mtcars$gear)
 mtcars$carb <- factor(mtcars$carb)
 mtcars$cyl <- factor(mtcars$cyl)
+mtcars$cwt <- scale(mtcars$wt, scale = FALSE)
+mtcars$cdisp <- scale(mtcars$disp, scale = FALSE)
+mtcars$cmpg <- scale(mtcars$mpg, scale = FALSE)
+mtcars$toy <- ifelse(rownames(mtcars) == 'Toyota Corolla',1,0)
+mtcars$fiat <- ifelse(rownames(mtcars) == 'Fiat 128',1,0)
 
-names(mtcars)
+mtcars %>%
+  group_by(am, cyl, toy, fiat) %>%
+  summarise(mpg = mean(mpg),
+            wt = mean(cwt))
 
 ggpairs(mtcars,
         colour = 'am',
@@ -30,8 +38,14 @@ summary(fit0)
 par(mfrow = c(2,2))
 plot(fit0)
 
-# By defining a model where MPG is explained by factor effect of transmition type and weight along with their interaction. Number of cylinders is also introduced as factor.
-fit <- lm(mpg ~ am * wt + cyl, mtcars)
+# By defining a model where MPG is explained by factor effect of transmition type and weight along with their interaction. Number of cylinders is also introduced as factor. Weight is centred to improve interpretability.
+mtcars$cwt <- scale(mtcars$wt, scale = FALSE)
+mtcars$toy <- ifelse(rownames(mtcars) == 'Toyota Corolla',1,0)
+mtcars$fiat <- ifelse(rownames(mtcars) == 'Fiat 128',1,0)
+
+
+# fit <- lm(mpg ~ am * cwt + cyl, mtcars)
+fit <- lm(cmpg ~ am : cwt + cyl:cwt + am + cyl + toy + fiat, mtcars)
 summary(fit)
 
 # Adjustment is not much worse than when all variables (and its high number of parameters) were used. In addition, all coefficients have low enough standard errors to be acceptable for the author (especially given the low sample size given the complex relationships present and the limitation of tools allowed in this exercise). 
@@ -52,3 +66,7 @@ fit3 <- lm(mpg ~ am + cyl + wt, mtcars)
 summary(fit3)
 par(mfrow = c(2,2))
 plot(fit3)
+
+
+
+anova(fit,fit0)
