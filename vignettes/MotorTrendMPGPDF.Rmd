@@ -6,7 +6,7 @@ output:
     fig_caption: yes
     keep_tex: yes
 abstract: |
-  The following analysis identifies alternative scenarios in MPG efficiency in cars due to the presence of different types of transmition (automatic vs. manual). These are described through statistical inference and provide a quantifiable measure of benefit from one type compared to the other. All analyses use R dataset *mtcars*, and combine a series of exploratory and regression based techniques to quantify efficiency based on observed data.
+  The following analysis identifies alternative scenarios in car MPG efficiency attributable to different types of transmition (automatic vs. manual). These are described through statistical inference and provide a quantifiable measure of benefit from one type compared to the other. All analyses use R dataset *mtcars*, and combine a series of exploratory and regression based techniques to quantify efficiency based on observed data.
 ---
 
 ```{r setup, include=FALSE}
@@ -15,12 +15,12 @@ knitr::opts_chunk$set(cache=TRUE)
 
 # Objective
 
-We use dataset *mtcars* from the *datasets* R package, and our aim is to determine the impact of several variables in the efficiency and accuracy of quantifying fuel consumption efficiency through mile-per-galon (*MPG*). Specifically, two questions will be answered:
+We use dataset *mtcars* from R package *datasets* to determine the impact of several potential variables on fuel consumption efficiency. Specifically, two questions will be answered:
 
-1. Is an automatic or manual transmission better for *MPG*?
+1. Is an automatic or manual transmission better for miles-per-galon (*MPG*)?
 2. How much better (measured by change in *MPG*) is one type of transmition vs. the other? 
 
-We start by identifying possible correlation among variables included in our data. A series of exploratory analyses helped identify data relationship candidates. Specifically, any relationships to transmission type (automatic vs. manual; variable *am*) & mpg (variable *mpg*). 
+We start by identifying possible correlation among variables. A series of exploratory analyses helped identify candidate relationships; specifically transmission type (automatic vs. manual; variable *am*) & mpg (variable *mpg*). 
 
 ```{r exploratory, echo=FALSE, warning=FALSE, results='hide', cache=TRUE, message=FALSE}
 library(ggplot2)
@@ -64,15 +64,11 @@ am | Transmission (automatic vs. manual)
 gear | Number of forward gears
 carb | Number of carburetors
 
-# Exploratory Analysis
+# Exploring & Modelling MPG
 
-A combination of correlation, and plotting is performed for initial exploration. *mpg* has high correlation with a few variables relating to the car dimensions. Also, a car's weight (*wt*), displacement (*disp*), and gross horse power (*hp*) are themselves highly correlated. This suggests any linear-based regression modelling approach will confound any effects. This is especially true should they all be included in a model directly (see *Figure 1*). There also appear to be clear relationships between transmision type (*am*) and attributes like number of cylinders (*cyl*) or carburetors (*carb*), or engine type (*vs*). However, the distribution of the number of forward gears (*gear*) is less clear, perhaps due to the small number of observations in our dataset (see *Figure 2*).
+A combination of correlation, and plotting was performed. *mpg* has high correlation with a few variables relating to car dimensions. Also, a car's weight (*wt*), displacement (*disp*), and gross horse power (*hp*) are highly correlated. This suggests any linear-based regression modelling approach could confound simultaneous effects (see *Figure 1*). There also appear to be clear relationships between transmision type (*am*) and attributes like number of cylinders (*cyl*) or carburetors (*carb*), or engine type (*vs*). However, the distribution of the number of forward gears (*gear*) is less clear, perhaps due to the small number of observations in our dataset (see *Figure 2*). While some patterns are visible between transmission and other attributes, it is sometimes difficult to determine whether these patterns are logical and expected, rather than purely random observations in this particular data. While manual transmission cars tend to have more forward gears, cylinders, and carburetors, there's no immediate evidence of these being linked more directly to engine type.
 
-While some patterns are visible between transmission and some other attributes, it is sometimes difficult to determine whether these patterns are logical and expected, rather than purely random observations in this particular data. So, while manual transmission cars tend to have more forward gears, cylinders, and carburetors, there's no immediate evidence of these being linked more directly to engine type.
-
-# Modelling MPG
-
-Next, a few of the relationships identified were modelled through linear regression to try and quantify the effect of different car specs on *MPG*, namely transmission type. The exploratory phase confirmed linear regression was a suitable approach given *mpg* empirically close to a Normal distribution. After a series of iterations (described in comments of [R Markdown file](https://github.com/Jamamel/MotorTrendMPG/blob/master/R/MotorTrendMPG.R)), the best model was that in which *mpg* was described by the interaction between type of transmision and weight, number of cylinders (as a factor referencing 4 cylinders, the type of transmision on its own, and two dummy variables for Toyota Corolla and Fiat 128 cars. These 2 cars were modelled uniquely given their leverage on the model (see results below). 
+Next, a few of the relationships identified were modelled through linear regression to try and quantify the effect of different car specs on *MPG*, namely transmission type. The exploratory phase confirmed linear regression was a suitable approach given *mpg* fits the assumption of Normality. After a series of model iterations (described in comments of [R Markdown file](https://github.com/Jamamel/MotorTrendMPG/blob/master/R/MotorTrendMPG.R)), the best model was that in which *mpg* was described by the interaction between type of transmision and weight, number of cylinders (as a factor referencing 4 cylinders), type of transmision on its own, and two dummy variables for Toyota Corolla and Fiat 128 cars. These 2 cars were modelled uniquely given their leverage on the model (see results below) and unique behaviour. 
 
 ```{r models, echo=FALSE, results='hide', fig.keep='none', warning=FALSE}
 # First model reveals a possible relationship of wt and hp when all other effects present. 
@@ -112,7 +108,7 @@ plot(fit3)
 knitr::kable(round(summary(fit)$coefficients, 3))
 ```
 
-All estimated coefficients have acceptable p-values, and adjusted overall fit stands at a high **`r round(summary(fit)$adj.r.squared, 2)` with `r summary(fit)$df[2]` degrees of freedom** . Of more interest is the fact the residual standard error is low at **`r round(summary(fit)$sigma,2)`**. Residual analysis also shows all residuals are within 1.5 standard deviations of the mean. Normality is fairly consistent apart from a couple of cases which don't have enough leverage on the analysis to make a meaningful difference (*See Figure 3*).
+All estimated coefficients have acceptable p-values (lowest confidence is for type single effect at `r round(1 - max(summary(fit)$coefficients[,'Pr(>|t|)']), 2)`), and adjusted overall fit stands at a high **`r round(summary(fit)$adj.r.squared, 2)` with `r summary(fit)$df[2]` degrees of freedom** . Of more interest is the fact the residual standard error is low at **`r round(summary(fit)$sigma,2)`**. Residual analysis also shows all residuals are within 1.5 standard deviations of the mean. Normality is fairly consistent apart from a couple of cases which don't have enough leverage on the analysis to make a meaningful difference (*See Figure 3*).
 
 # Results & Conclusions
  
@@ -133,11 +129,11 @@ The model does suggest that an increase of one ton for manual transmision vehicl
 
 While the model suggests a manual transmision on its own is not enough to make a difference, it sits at the core of a lot dimensions that ultimately define how efficient a car is. Automatic transmisions are difficult to place in smaller cars, rather these usually tend to be heavier vehicles with more cylinders. What is clear, is that designing a manual transmision vehicle that's small, powerful, and efficient enough is a challenge. At the same time manual transmision plays a fundamental role in allowing the car to be lighter and with a smaller engine, essential requirements for a more efficient car.
 
+\newpage
+
 # References
 
 - [MotorTrendMPG Github Repo](https://github.com/Jamamel/MotorTrendMPG)
-
-\newpage
 
 # Appendix
 
@@ -149,10 +145,10 @@ print(contcorr)
 print(disccorr)
 ```
 
-```{r plotmodels, anchor=TRUE, echo=FALSE, warning=FALSE, results='markup', message=FALSE, fig.cap='Model Fit Diagnostics'}
+```{r plotmodels, anchor=TRUE, echo=FALSE, warning=FALSE, results='markup', message=FALSE, fig.cap='Final model Fit Diagnostics'}
 # fit0 - Large residuals and the assumption of Normality in the regressions error terms appears not to be accurate.
-par(mfrow = c(2,2))
-plot(fit0)
+# par(mfrow = c(2,2))
+# plot(fit0)
 
 
 # fit - Residual variance is lower and the assumption of Normality, while not perfect, is better founded. Four cars have a similar patterns that aren't easily isolated with simple linear regression.  However, fit and parsimony of the model were deemed acceptable.
