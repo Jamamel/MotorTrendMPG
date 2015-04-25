@@ -32,8 +32,8 @@ Hash: 5203278413b09be06483c5ac1920bb05
 
 Package: RCurl
 Source: CRAN
-Version: 1.95-4.5
-Hash: 1187c1ea73013abf25f362a7e6da1046
+Version: 1.95-4.6
+Hash: a4d86df231587d1eae56f29c278bad0d
 Requires: bitops
 
 Package: Rcpp
@@ -92,14 +92,14 @@ Requires: BH, DBI, R6, Rcpp, assertthat, lazyeval, magrittr
 
 Package: evaluate
 Source: CRAN
-Version: 0.6
-Hash: 1dff379afa4a41ca703a24d50aa69f64
+Version: 0.7
+Hash: 96c38894bf65a2e890f7c6ec840a6466
 Requires: stringr
 
 Package: formatR
 Source: CRAN
-Version: 1.1
-Hash: 8d2a06a106150308bffdd6e669669c0c
+Version: 1.2
+Hash: d518b2a342a62e0add8c07403859ff13
 
 Package: ggplot2
 Source: CRAN
@@ -114,8 +114,8 @@ Hash: 0cf4a2b54c02b35dec7e74a8ebed12a0
 
 Package: highr
 Source: CRAN
-Version: 0.4.1
-Hash: 6845341309f2bcd75a7ba4c3237cbd0f
+Version: 0.5
+Hash: d9f29aef93e6fd4f287cec2de07ca468
 
 Package: htmltools
 Source: CRAN
@@ -136,9 +136,9 @@ Hash: d96313db22c1ea2028538db1fc96fe5a
 
 Package: knitr
 Source: CRAN
-Version: 1.9
-Hash: 41c29594ced4d02b3b90b4c375680cd3
-Requires: digest, evaluate, formatR, highr, markdown, stringr
+Version: 1.10
+Hash: 597470725a1eabf96f79610e1c0b0a29
+Requires: digest, evaluate, formatR, highr, markdown, stringr, yaml
 
 Package: labeling
 Source: CRAN
@@ -185,8 +185,8 @@ Hash: 16c72d5c802629fae5a4abca901e0199
 
 Package: plyr
 Source: CRAN
-Version: 1.8.1
-Hash: 6a4457c04af4cf5e4a8166ff59bcfd96
+Version: 1.8.2
+Hash: 4997cfd365c935eaaef569f25546b027
 Requires: Rcpp
 
 Package: proto
